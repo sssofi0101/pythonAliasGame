@@ -18,8 +18,9 @@ class CountTeamsScreen(Screen):
             screen=self.manager.get_screen('secondscreen')
             global teams_count
             teams_count=int(screen.input2.text)
+            self.manager.current = 'thirdscreen'
         except:
-            teams_count= 0
+            screen.label.text = 'Ошибка!!! \nВведите количество команд'
 
 
 names=[]
@@ -28,7 +29,7 @@ class TeamsNamesScreen(Screen):
     def get_names(self):
         global current_team
         if (self.input_text.text == ''):
-            self.number_of_team.text = 'Ошибка!!! \n' + self.number_of_team.text
+            self.number_of_team.text = 'Ошибка!!! \nВведите название команды'
         else:
             names.append(self.input_text.text)
             if (current_team <teams_count):
@@ -37,8 +38,33 @@ class TeamsNamesScreen(Screen):
                 self.input_text.text = ''
             else:self.manager.current='fourthscreen'
 
-
+seconds_on_tour=0
+tours_count=0
 class GameSettingsScreen(Screen):
+    def get_settings(self):
+        global seconds_on_tour
+        global tours_count
+        if (self.input_time.text == ''):
+            self.label1.text = 'Ошибка!!! \nВведите количество времени на игрока'
+        else:
+            try:
+                seconds_on_tour=int(self.input_time.text)
+                self.label1.text='Введите количество времени на игрока'
+            except:self.label1.text = 'Ошибка!!! Введите целое число\nВведите количество времени на игрока'
+            if self.input_tours.text == '':
+                self.label2.text = 'Ошибка!!! \nВведите количество туров\n(1 тур - игра всех игроков в командах)'
+            else:
+                try:
+                    tours_count= int(self.input_tours.text)
+                    self.label2.text = 'Введите количество туров\n(1 тур - игра всех игроков в командах)'
+                except:
+                    self.label2.text = 'Ошибка!!! Введите целое число\nВведите количество туров\n(1 тур - игра всех игроков в командах)'
+        if not(seconds_on_tour==0)and(not(tours_count==0)):
+            self.manager.current = 'fifthscreen'
+
+
+
+class GameScreen(Screen):
     pass
 
 
@@ -49,6 +75,7 @@ class MyApp(App):
         sm.add_widget(CountTeamsScreen(name='secondscreen'))
         sm.add_widget(TeamsNamesScreen(name='thirdscreen'))
         sm.add_widget(GameSettingsScreen(name='fourthscreen'))
+        sm.add_widget(GameScreen(name='fifthscreen'))
         return sm
 
 
