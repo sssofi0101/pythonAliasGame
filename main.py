@@ -5,6 +5,8 @@ from kivy.uix.label import Label
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.config import Config
+from kivy.clock import Clock
+from functools import partial
 Config.set('kivy','keyboard_mode','systemanddock')
 
 
@@ -12,12 +14,17 @@ class HelloScreen(Screen):
     pass
 
 teams_count=0
+scores=[]
 class CountTeamsScreen(Screen):
     def get_teams_count(self):
+        screen = self.manager.get_screen('secondscreen')
         try:
-            screen=self.manager.get_screen('secondscreen')
             global teams_count
             teams_count=int(screen.input2.text)
+            s=0
+            while s<teams_count:
+                scores.append(0)
+                s=s+1
             self.manager.current = 'thirdscreen'
         except:
             screen.label.text = 'Ошибка!!! \nВведите количество команд'
@@ -40,6 +47,7 @@ class TeamsNamesScreen(Screen):
 
 seconds_on_tour=0
 tours_count=0
+counter=0
 class GameSettingsScreen(Screen):
     def get_settings(self):
         global seconds_on_tour
@@ -49,6 +57,8 @@ class GameSettingsScreen(Screen):
         else:
             try:
                 seconds_on_tour=int(self.input_time.text)
+                global counter
+                counter = seconds_on_tour
                 self.label1.text='Введите количество времени на игрока'
             except:self.label1.text = 'Ошибка!!! Введите целое число\nВведите количество времени на игрока'
             if self.input_tours.text == '':
@@ -63,8 +73,56 @@ class GameSettingsScreen(Screen):
             self.manager.current = 'fifthscreen'
 
 
+i=0
+j=1
+prev_i=0
 
 class GameScreen(Screen):
+    def my_callback(screen,dt):
+        global counter
+        global seconds_on_tour
+        if counter>0:
+            counter = counter - 1
+            screen.ids.timer.text = str(counter)
+        else:
+            screen.ids.skip_button.disabled=True
+            screen.ids.right_button.disabled = True
+            screen.ids.next_button.disabled = False
+
+    def go_next(self):
+        global i
+        global counter
+        global j
+        global prev_i
+        global tours_count
+        global teams_count
+        if j>tours_count:
+            self.manager.current = 'sixthscreen'
+            return
+        self.team_name.text = names[i]
+        prev_i=i
+        if (i==0)and (j==1):
+            Clock.schedule_interval(partial(GameScreen.my_callback,self), 1)
+        if (i+1==teams_count):
+            if (j<=tours_count):
+                j=j+1
+                i=0
+        else:
+            i = i + 1
+        self.next_button.disabled = True
+        self.right_button.disabled = False
+        self.skip_button.disabled = False
+        global seconds_on_tour
+        counter=seconds_on_tour
+        self.timer.text = str(counter)
+
+    def right_answer(self):
+        global scores
+        scores[prev_i]=scores[prev_i]+1
+        # перейти к след.слову
+
+
+class ScoreScreen(Screen):
     pass
 
 
@@ -76,6 +134,7 @@ class MyApp(App):
         sm.add_widget(TeamsNamesScreen(name='thirdscreen'))
         sm.add_widget(GameSettingsScreen(name='fourthscreen'))
         sm.add_widget(GameScreen(name='fifthscreen'))
+        sm.add_widget(ScoreScreen(name='sixthscreen'))
         return sm
 
 
