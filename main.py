@@ -7,6 +7,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.config import Config
 from kivy.clock import Clock
 from functools import partial
+import random
+from kivy import *
 Config.set('kivy','keyboard_mode','systemanddock')
 
 
@@ -76,7 +78,10 @@ class GameSettingsScreen(Screen):
 i=0
 j=1
 prev_i=0
-
+f = open('words.txt',encoding='utf8')
+lines=f.readlines()
+dictionary=lines[0].split('\u2028')
+f.close()
 class GameScreen(Screen):
     def my_callback(screen,dt):
         global counter
@@ -98,6 +103,7 @@ class GameScreen(Screen):
         global teams_count
         if j>tours_count:
             self.manager.current = 'sixthscreen'
+            #MyApp.raiting(self.manager.current,self)
             return
         self.team_name.text = names[i]
         prev_i=i
@@ -115,15 +121,46 @@ class GameScreen(Screen):
         global seconds_on_tour
         counter=seconds_on_tour
         self.timer.text = str(counter)
+        global dictionary
+        word=random.choice(dictionary)
+        self.word.text=word
+        dictionary.remove(word)
 
     def right_answer(self):
         global scores
         scores[prev_i]=scores[prev_i]+1
-        # перейти к след.слову
+        global dictionary
+        word = random.choice(dictionary)
+        self.word.text = word
+        dictionary.remove(word)
+
+    def skip(self):
+        global dictionary
+        word = random.choice(dictionary)
+        self.word.text = word
+        dictionary.remove(word)
 
 
 class ScoreScreen(Screen):
-    pass
+    def on_pre_enter(self, *args):
+        self.raiting()
+    def raiting(self):
+        d={}
+        global names
+        for c in range(len(names)):
+            d[names[c]]=scores[c]
+        sorted_scores=sorted(d.values())
+        sorted_dict={}
+        for j in sorted_scores:
+            for k in d.keys():
+                if (d[k]==j):
+                    sorted_dict[k]=d[k]
+        for t in sorted_dict.keys():
+            self.ids.teams.text=self.ids.teams.text+'\n'+str(t)
+        for s in sorted_dict.values():
+            self.ids.scores.text=self.ids.text+'\n'+str(s)
+
+
 
 
 class MyApp(App):
@@ -136,6 +173,7 @@ class MyApp(App):
         sm.add_widget(GameScreen(name='fifthscreen'))
         sm.add_widget(ScoreScreen(name='sixthscreen'))
         return sm
+
 
 
 if __name__ == '__main__':
