@@ -1,14 +1,9 @@
 from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.config import Config
 from kivy.clock import Clock
 from functools import partial
 import random
-from kivy import *
 Config.set('kivy','keyboard_mode','systemanddock')
 
 
@@ -103,7 +98,6 @@ class GameScreen(Screen):
         global teams_count
         if j>tours_count:
             self.manager.current = 'sixthscreen'
-            #MyApp.raiting(self.manager.current,self)
             return
         self.team_name.text = names[i]
         prev_i=i
@@ -142,25 +136,22 @@ class GameScreen(Screen):
 
 
 class ScoreScreen(Screen):
-    def on_pre_enter(self, *args):
-        self.raiting()
     def raiting(self):
         d={}
         global names
+        global scores
         for c in range(len(names)):
             d[names[c]]=scores[c]
-        sorted_scores=sorted(d.values())
+        sorted_scores=sorted(d.values(), reverse=True)
         sorted_dict={}
         for j in sorted_scores:
             for k in d.keys():
                 if (d[k]==j):
                     sorted_dict[k]=d[k]
         for t in sorted_dict.keys():
-            self.ids.teams.text=self.ids.teams.text+'\n'+str(t)
+            self.teams.text=self.teams.text+'\n\n'+str(t)
         for s in sorted_dict.values():
-            self.ids.scores.text=self.ids.text+'\n'+str(s)
-
-
+           self.scores.text=self.scores.text+'\n\n'+str(s)
 
 
 class MyApp(App):
@@ -173,7 +164,6 @@ class MyApp(App):
         sm.add_widget(GameScreen(name='fifthscreen'))
         sm.add_widget(ScoreScreen(name='sixthscreen'))
         return sm
-
 
 
 if __name__ == '__main__':
