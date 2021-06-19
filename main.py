@@ -150,9 +150,6 @@ class GameScreen(Screen): #класс, инициализирующий пято
         global prev_i
         global tours_count
         global teams_count
-        if j>tours_count: #если номер текущего тура больше общего количества туров
-            self.manager.current = 'sixthscreen'#переходим на следующий экран
-            return
         self.team_name.text = names[i]
         prev_i=i
         if (i==0)and (j==1):
@@ -178,6 +175,15 @@ class GameScreen(Screen): #класс, инициализирующий пято
          функция для продолжения игры в пятом экране программы.
          Запускает игру с заданиями или без них в зависимости от выбранного пользователем режима.
         """
+        global i
+        global counter
+        global j
+        global prev_i
+        global tours_count
+        global teams_count
+        if j > tours_count:  # если номер текущего тура больше общего количества туров
+            self.manager.current = 'sixthscreen'  # переходим на следующий экран
+            return
         global tasks_game
         if (tasks_game==True):
             self.my_popup()
